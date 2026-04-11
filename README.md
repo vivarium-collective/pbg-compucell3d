@@ -1,5 +1,7 @@
 # pbg-compucell3d
 
+**[View the Interactive Demo Report](https://vivarium-collective.github.io/pbg-compucell3d/)**
+
 Process-bigraph wrapper for [CompuCell3D](https://compucell3d.org/) — a
 cellular Potts model (CPM / Glazier-Graner-Hogeweg) simulator for
 multicellular systems.  This package wraps CC3D's Python API as a single

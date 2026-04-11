@@ -209,7 +209,7 @@ class CompuCell3DProcess(Process):
         specs = [potts, cell_types, volume, surface, contact, blob]
 
         # ── Optional: chemotaxis ──
-        has_chemo = cfg['chemotaxis_lambda'] > 0
+        has_chemo = cfg['chemotaxis_lambda'] != 0
         if has_chemo:
             diff_solver = DiffusionSolverFE()
             f = diff_solver.field_new('Signal')

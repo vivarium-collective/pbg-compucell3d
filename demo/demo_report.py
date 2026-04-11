@@ -107,6 +107,44 @@ CONFIGS = [
         'total_mcs': 3000,
         'color_scheme': 'rose',
     },
+    {
+        'id': 'invasion',
+        'title': 'Tumor Spheroid Invasion',
+        'subtitle': 'Growing colony with chemotaxis-driven dispersal',
+        'description': (
+            'This experiment combines all three physics modules — '
+            'differential adhesion, chemotaxis, and mitosis — to model '
+            'tumour spheroid invasion.  TypeA cells (green) form a '
+            'tightly cohesive core (J_AA = 2) that secretes a diffusible '
+            'signal.  TypeB cells (orange) are repelled by the signal '
+            '(lambda_chemo = -200) and have weak medium adhesion '
+            '(J_M-B = 8), causing them to scatter outward as invasive '
+            'cells.  Both populations grow and divide (division at 50 px, '
+            '+0.06 px/MCS).  The result is a dense expanding core '
+            'surrounded by a diffuse front of dispersing invaders — a '
+            'hallmark of collective cell invasion.'
+        ),
+        'config': {
+            'dim_x': 150, 'dim_y': 150,
+            'fluctuation_amplitude': 10.0,
+            'blob_radius': 15, 'cell_width': 5,
+            'target_volume': 25, 'lambda_volume': 5.0,
+            'contact_medium_t1': 25.0,
+            'contact_medium_t2': 8.0,
+            'contact_t1_t1': 2.0,
+            'contact_t1_t2': 14.0,
+            'contact_t2_t2': 8.0,
+            'chemotaxis_lambda': -200.0,
+            'diffusion_constant': 0.05,
+            'decay_constant': 0.0002,
+            'secretion_rate': 0.08,
+            'division_volume': 50,
+            'growth_rate_per_mcs': 0.06,
+        },
+        'n_snapshots': 20,
+        'total_mcs': 4000,
+        'color_scheme': 'amber',
+    },
 ]
 
 
@@ -230,6 +268,8 @@ COLOR_SCHEMES = {
                 'bg': '#ecfdf5', 'accent': '#34d399', 'text': '#064e3b'},
     'rose': {'primary': '#f43f5e', 'light': '#ffe4e6', 'dark': '#e11d48',
              'bg': '#fff1f2', 'accent': '#fb7185', 'text': '#881337'},
+    'amber': {'primary': '#f59e0b', 'light': '#fef3c7', 'dark': '#d97706',
+              'bg': '#fffbeb', 'accent': '#fbbf24', 'text': '#78350f'},
 }
 
 # Cell colors for 2D lattice viewer: medium=bg, type1=green, type2=orange

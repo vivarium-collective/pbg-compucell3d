@@ -430,7 +430,8 @@ body {{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-seri
 .metric-sub {{ display:block; font-size:.7rem; color:#94a3b8; }}
 .viewer-wrap {{ position:relative; background:#f1f5f9; border:1px solid #e2e8f0;
                 border-radius:14px; overflow:hidden; margin-bottom:1rem; }}
-.lattice-canvas {{ width:100%; aspect-ratio:1/1; max-height:600px; display:block; image-rendering:pixelated; }}
+.lattice-canvas {{ display:block; margin:0 auto; image-rendering:pixelated;
+                   image-rendering:crisp-edges; }}
 .viewer-info {{ position:absolute; top:.8rem; left:.8rem; background:rgba(255,255,255,.92);
                 border:1px solid #e2e8f0; border-radius:8px; padding:.5rem .8rem;
                 font-size:.75rem; color:#64748b; backdrop-filter:blur(4px); }}
@@ -600,14 +601,10 @@ function renderLattice(sid, frameIdx) {{
   const canvas = document.getElementById('canvas-' + sid);
   const ctx = canvas.getContext('2d');
 
-  // Scale factor: render at higher resolution for sharp display
-  const scale = Math.max(1, Math.floor(600 / Math.max(W, H)));
-  const cW = W * scale;
-  const cH = H * scale;
-  canvas.width = cW;
-  canvas.height = cH;
-
-  const img = ctx.createImageData(cW, cH);
+  // Render at native lattice resolution; CSS scaling handles display size
+  canvas.width = W;
+  canvas.height = H;
+  const img = ctx.createImageData(W, H);
 
   const showConc = d.has_conc && concStates[sid];
   let concMax = 0;
@@ -626,12 +623,13 @@ function renderLattice(sid, frameIdx) {{
 
   for (let x = 0; x < W; x++) {{
     for (let y = 0; y < H; y++) {{
+      const idx = (y * W + x) * 4;
       const cellType = snap.type_field[x][y];
       let r, g, b;
 
-      // Boundary pixel → dark outline
+      // Boundary pixel → dark thin outline (1 native pixel)
       if (bnd[x * H + y]) {{
-        r = 30; g = 30; b = 30;
+        r = 40; g = 40; b = 40;
       }} else if (cellType > 0) {{
         const c = CELL_COLORS[cellType] || [150,150,150];
         r = c[0]; g = c[1]; b = c[2];
@@ -643,18 +641,10 @@ function renderLattice(sid, frameIdx) {{
         r = 245; g = 248; b = 252;
       }}
 
-      // Fill scaled block
-      for (let sx = 0; sx < scale; sx++) {{
-        for (let sy = 0; sy < scale; sy++) {{
-          const px = x * scale + sx;
-          const py = y * scale + sy;
-          const idx = (py * cW + px) * 4;
-          img.data[idx]   = r;
-          img.data[idx+1] = g;
-          img.data[idx+2] = b;
-          img.data[idx+3] = 255;
-        }}
-      }}
+      img.data[idx]   = r;
+      img.data[idx+1] = g;
+      img.data[idx+2] = b;
+      img.data[idx+3] = 255;
     }}
   }}
   ctx.putImageData(img, 0, 0);
@@ -662,6 +652,14 @@ function renderLattice(sid, frameIdx) {{
 
 function initViewer(sid) {{
   concStates[sid] = DATA[sid].has_conc;
+
+  // Set CSS display size: square, fitting the container
+  const canvas = document.getElementById('canvas-' + sid);
+  const wrap = canvas.parentElement;
+  const maxPx = Math.min(wrap.clientWidth - 32, 600);
+  canvas.style.width  = maxPx + 'px';
+  canvas.style.height = maxPx + 'px';
+
   renderLattice(sid, 0);
 
   const slider = document.getElementById('slider-' + sid);

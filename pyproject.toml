@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pbg-compucell3d"
+version = "0.1.0"
+description = "Process-bigraph wrapper for CompuCell3D cellular Potts model simulator"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "process-bigraph>=0.0.10",
+    "bigraph-schema",
+    "numpy",
+    "matplotlib",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+include = ["pbg_compucell3d*"]

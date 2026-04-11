@@ -1,0 +1,14 @@
+[workspace]
+authors = ["Eran <agmon.eran@gmail.com>"]
+channels = ["compucell3d", "conda-forge"]
+name = "pbg-compucell3d"
+platforms = ["osx-arm64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+cc3d = ">=4.6.0,<5"
+python = "3.10.*"
+pip = ">=26.0.1,<27"
+graphviz = ">=9.0.0,<10"

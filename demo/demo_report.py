@@ -271,6 +271,7 @@ def generate_html(sim_results, output_path):
             entry = {
                 'mcs': s['mcs'],
                 'type_field': s['type_field'],
+                'id_field': s['id_field'],
             }
             if has_conc and s['conc_field'] is not None:
                 entry['conc_field'] = s['conc_field']
@@ -429,7 +430,7 @@ body {{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-seri
 .metric-sub {{ display:block; font-size:.7rem; color:#94a3b8; }}
 .viewer-wrap {{ position:relative; background:#f1f5f9; border:1px solid #e2e8f0;
                 border-radius:14px; overflow:hidden; margin-bottom:1rem; }}
-.lattice-canvas {{ width:100%; height:500px; display:block; image-rendering:pixelated; }}
+.lattice-canvas {{ width:100%; aspect-ratio:1/1; max-height:600px; display:block; image-rendering:pixelated; }}
 .viewer-info {{ position:absolute; top:.8rem; left:.8rem; background:rgba(255,255,255,.92);
                 border:1px solid #e2e8f0; border-radius:8px; padding:.5rem .8rem;
                 font-size:.75rem; color:#64748b; backdrop-filter:blur(4px); }}
@@ -581,15 +582,32 @@ function turboColormap(t) {{
   return [Math.round(r), Math.round(g), Math.round(b)];
 }}
 
+function isBoundary(idField, x, y, W, H) {{
+  // A pixel is on a cell boundary if any 4-neighbour has a different cell ID
+  const cid = idField[x][y];
+  if (cid === 0) return false;
+  if (x > 0   && idField[x-1][y] !== cid) return true;
+  if (x < W-1 && idField[x+1][y] !== cid) return true;
+  if (y > 0   && idField[x][y-1] !== cid) return true;
+  if (y < H-1 && idField[x][y+1] !== cid) return true;
+  return false;
+}}
+
 function renderLattice(sid, frameIdx) {{
   const d = DATA[sid];
   const snap = d.snapshots[frameIdx];
   const [W, H] = d.dim;
   const canvas = document.getElementById('canvas-' + sid);
   const ctx = canvas.getContext('2d');
-  canvas.width = W;
-  canvas.height = H;
-  const img = ctx.createImageData(W, H);
+
+  // Scale factor: render at higher resolution for sharp display
+  const scale = Math.max(1, Math.floor(600 / Math.max(W, H)));
+  const cW = W * scale;
+  const cH = H * scale;
+  canvas.width = cW;
+  canvas.height = cH;
+
+  const img = ctx.createImageData(cW, cH);
 
   const showConc = d.has_conc && concStates[sid];
   let concMax = 0;
@@ -599,12 +617,22 @@ function renderLattice(sid, frameIdx) {{
         if (snap.conc_field[x][y] > concMax) concMax = snap.conc_field[x][y];
   }}
 
+  // Pre-compute boundary map
+  const idField = snap.id_field;
+  const bnd = new Uint8Array(W * H);
+  for (let x = 0; x < W; x++)
+    for (let y = 0; y < H; y++)
+      if (isBoundary(idField, x, y, W, H)) bnd[x * H + y] = 1;
+
   for (let x = 0; x < W; x++) {{
     for (let y = 0; y < H; y++) {{
-      const idx = (y * W + x) * 4;
       const cellType = snap.type_field[x][y];
       let r, g, b;
-      if (cellType > 0) {{
+
+      // Boundary pixel → dark outline
+      if (bnd[x * H + y]) {{
+        r = 30; g = 30; b = 30;
+      }} else if (cellType > 0) {{
         const c = CELL_COLORS[cellType] || [150,150,150];
         r = c[0]; g = c[1]; b = c[2];
       }} else if (showConc && snap.conc_field && concMax > 0) {{
@@ -614,10 +642,19 @@ function renderLattice(sid, frameIdx) {{
       }} else {{
         r = 245; g = 248; b = 252;
       }}
-      img.data[idx]   = r;
-      img.data[idx+1] = g;
-      img.data[idx+2] = b;
-      img.data[idx+3] = 255;
+
+      // Fill scaled block
+      for (let sx = 0; sx < scale; sx++) {{
+        for (let sy = 0; sy < scale; sy++) {{
+          const px = x * scale + sx;
+          const py = y * scale + sy;
+          const idx = (py * cW + px) * 4;
+          img.data[idx]   = r;
+          img.data[idx+1] = g;
+          img.data[idx+2] = b;
+          img.data[idx+3] = 255;
+        }}
+      }}
     }}
   }}
   ctx.putImageData(img, 0, 0);

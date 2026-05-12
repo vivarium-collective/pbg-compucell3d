@@ -1,5 +1,6 @@
 name: cell-sorting-demo
 description: "Tiny CompuCell3D cell-sorting demo: a small two-type blob driven by differential adhesion. Emits cell counts, average volume/surface, and MCS each update."
+tags: [agent-based, cells, cellular-potts, demo]
 
 requires:
   processes: [CompuCell3DProcess, RAMEmitter]

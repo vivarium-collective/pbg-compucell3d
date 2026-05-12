@@ -1,5 +1,6 @@
 name: cell-sorting-with-viz
 description: "CompuCell3D cell-sorting demo with a wired Visualization Step. Each update produces a Plotly HTML figure of the running scalar trajectories, written to the 'viz_html' store."
+tags: [agent-based, cells, cellular-potts, demo, visualization]
 
 requires:
   processes: [CompuCell3DProcess, CellSortingPlots, RAMEmitter]
